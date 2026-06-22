@@ -198,6 +198,40 @@
       background: #2d2d4e;
       color: #fff;
     }
+
+
+    #chatbox{
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+    }
+
+
+    #chatbox.visible{
+      opacity: 1;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .chat-messages{
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .customer-message{
+      background-color: #1a1a2e;
+      color: #fff;
+      border-radius: 10px 0  10px 10px;
+      margin-left:auto;
+    }
+
+
+    .agent-message{
+      background-color: #f3f4f6;
+      border-radius: 0 10px 10px 10px;
+      margin-right:auto;
+    }
+
   </style>
 </head>
 <body>
@@ -282,17 +316,94 @@
     </div>
 
     <div class="col-md-4">
-      <div class="help-card">
+      <!-- help card --visible by default -->
+      <div class="help-card" id="help-card">
         <div style="font-size:32px;">💬</div>
         <h6>Need help with this order?</h6>
         <p>Our AI support agent can help you with delivery issues, refunds, or any other concerns.</p>
-        <a href="#" class="btn-help">Get Help</a>
+        <button onclick="showChatbox()" class="btn-help">Get Help</button>
       </div>
+
+      <!-- chatbox -- hidden by default--  -->
+       <div id="chatbox" class="card">
+        <!-- header -->
+         <div class="card-header d-flex align-items-center gap-2">
+          <div style="width:8px; height:8px; border-radius:50%; background-color:green;"></div>
+          <span class="fw-semibold" style="font-size: 13px;">Support Agent</span>
+         </div>
+
+
+         <!-- chat area -->
+          <div id="chat-messages" class="chat-messages p-3 d-flex flex-column gap-2">
+            <div class="agent-message p-2 px-3" style="font-size:13px; max-width: 80%;">
+              Hi User, how can I assist you with your order today?
+            </div>
+
+            <div>
+
+            </div>
+
+          </div>
+
+
+          <!-- chat footer -->
+          <div class="card-footer d-flex">
+            <input type="text" id="chat-input" class="form-control form-control-sm" placeholder="Type your message..." style="font-size:13px;"/> 
+            <button class="btn btn-dark btn-sm px-3" onclick="sendMessage()">Send</button>
+          </div>
+
+       </div>
     </div>
 
   </div>
 
 </div>
+  <script>
 
+
+    function appendMessage(text,type){
+      const messages =  document.getElementById("chat-messages");
+
+      const div = document.createElement("div");
+      div.classList.add(type === "customer" ? "customer-message" : "agent-message");
+      div.classList.add("p-2","px-3");
+      div.style.fontSize = "13px";
+      div.style.maxWidth = "80%";
+      div.innerText = text;
+
+
+      messages.appendChild(div);
+    }
+
+
+    function sendMessage(){
+      const input = document.getElementById("chat-input");
+      const message = input.value.trim();
+      
+      // dont send empty messages
+      if(!message) return;
+
+      appendMessage(message,'customer');
+      input.value = "";
+    }
+
+    // send message on enter key press
+    document.getElementById("chat-input").addEventListener("keydown", function(e){
+      if(e.key === "Enter"){
+        e.preventDefault();
+        sendMessage();
+      }
+    })
+
+
+    // show chatbox and hide help card
+    function showChatbox(){
+       document.getElementById("help-card").style.display = "none";
+       const chatbox = document.getElementById("chatbox");
+       chatbox.classList.add("visible");
+       chatbox.style.opacity = 1;
+    }
+
+  </script>
 </body>
 </html>
