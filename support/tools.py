@@ -1,6 +1,9 @@
 
 from orders.models import Order,RefundRequest
 from django.utils import timezone
+from .tracking_data import DELIVERY_DATA 
+
+
 # Creating tools to help the agent to do its work faster
 
 # ------------------------
@@ -47,4 +50,22 @@ def get_refund_history(user_id):
         "total_refund_request" : len(history),
         "history":history
     }
+
+
+# ------------------------
+# Delivery Status as a tool
+# ------------------------
+def check_delivery_status(tracking_number, carrier):
+    default_response = {
+        "status": "Unknown",
+        "last_location": "TRacking info unavaliable",
+        "last_update": "N/A",
+        "estimated_delivery": "Contact carrier directly",
+        "delay_reason": "No update from carrier",
+    }
+
+    result = DELIVERY_DATA.get(tracking_number, default_response)
+    result["tracking_number"] = tracking_number
+    result["carrier"] = carrier
+    return result
 
