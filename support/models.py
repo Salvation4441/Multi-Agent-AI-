@@ -35,3 +35,26 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message {self.id} in Conversation {self.content[:50]} by {self.role}"
+    
+
+# -------------------------
+# Agent Log MODELS
+# -------------------------
+class AgentLog(models.Model):
+
+    EVENT_CHOICES = [
+        ("support","Support Agent"),
+        ("tool_call","Tool Call"),
+        ("tool_result","Tool Result"),
+        ("manager","Manager Agent"),
+        ("risk","Risk Agent"),
+        ("final","Final Reply"),
+    ]
+
+    conversation = models.ForeignKey(Conversation,on_delete=models.CASCADE, related_name="agentlogs")
+    event_type = models.CharField(max_length=20,choices=EVENT_CHOICES)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"[{self.event_type}] - {self.message[:40]}"
