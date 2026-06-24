@@ -1,3 +1,4 @@
 django
 PyMySQL
 python-decouple
+anthropic

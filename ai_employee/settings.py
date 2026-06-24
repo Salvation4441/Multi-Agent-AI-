@@ -127,3 +127,7 @@ STATIC_URL = "static/"
 LOGIN_REDIRECT_URL = "/orders/"
 LOGOUT_REDIRECT_URL = "/login/"
 LOGIN_URL = "/login/"
+
+
+CLAUDE_API_KEY = config("CLAUDE_API_KEY")
+CLAUDE_MODEL = config("CLAUDE_MODEL")
