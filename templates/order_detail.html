@@ -400,11 +400,13 @@
       if(!message) return;
 
       appendMessage(message,'customer');
+
       input.value = "";
+      input.disabled = true;
 
 
       // show typing here after 2 seconds
-      setTimeout(() => showTyping(), 2000);
+      const typingTimeout =  setTimeout(() => showTyping(), 1000);
 
       // send message to django view
       // from frontend  to backend
@@ -424,9 +426,20 @@
         hideTyping();
         appendMessage(data.reply, "agent");
 
+
+        input.disabled = false;
+        input.focus();
+
       }catch(error){
-        console.error("Error: ", error)
-        appendMessage("Sorry, something went wrong","agent")
+        console.error("Error: ", error);
+        appendMessage("Sorry, something went wrong","agent");
+
+        input.disabled = false;
+        input.focus();
+
+      }finally{
+        clearTimeout(typingTimeout);
+        hideTyping();
       }
     }
 
