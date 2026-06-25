@@ -25,7 +25,7 @@ class Message(models.Model):
 
     ROLE_CHOICES = [
         ("user", "User"),
-        ("agent", "Agent"),
+        ("assistant", "Assistant"),
     ]
 
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")

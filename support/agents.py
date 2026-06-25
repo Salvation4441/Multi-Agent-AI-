@@ -1,6 +1,7 @@
 from anthropic import Anthropic
 from django.conf import settings
 from .tools import *
+from . models import *
 
 
 # initializing anthropic client
@@ -21,6 +22,7 @@ Your responsibilities:
 - Check order details when customer mentions their order
 - Check refund history before making any refund decisions
 - Be empahetic but honest
+- Provide professional conversation with less emojies
 
 
 Your personality:
@@ -105,3 +107,25 @@ def execute_tool(tool_name, tool_input):
 
 
 # 4. AGENT LOOP -->This iterate until the loops task is done
+def run_support_agent(user_message, conversation_id): # this function is to give the user message to the LLM 
+    conv = Conversation.objects.get(id = conversation_id)
+
+    conversation_messages = []
+
+    for msg in conv.messages.order_by("created_at"):
+        conversation_messages.append({
+            "role" : msg.role,
+            "content" : msg.content
+        })
+
+    # sen this conversation to LLM
+    response = client.messages.create(
+        model = model,
+        max_tokens = 1024,
+        system = SUUPORT_SYSYTEM_PROMPT,
+        messages = conversation_messages
+    )
+
+    final_text = response.content[0].text
+
+    return final_text
