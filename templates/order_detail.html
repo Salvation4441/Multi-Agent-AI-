@@ -367,6 +367,7 @@
           Typing .... 
         </div>
       `);
+      messages.scrollTop = messages.scrollHeight;
     }
 
     // hide typing
@@ -387,6 +388,7 @@
 
 
       messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
     }
 
 
@@ -401,8 +403,8 @@
       input.value = "";
 
 
-      // show typing here
-      showTyping();
+      // show typing here after 2 seconds
+      setTimeout(() => showTyping(), 2000);
 
       // send message to django view
       // from frontend  to backend

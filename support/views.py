@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import json
 from django.http import JsonResponse
+import time
 
 # Create your views here.
 def chat(request, order_id):
@@ -11,4 +12,5 @@ def chat(request, order_id):
         if not user_messgae:
             return JsonResponse({"error" : "Empty message"}, status=400)
         
-    return JsonResponse({"reply" : "here is the reply"})
+        time.sleep(3);
+        return JsonResponse({"reply" : "here is the reply"})
