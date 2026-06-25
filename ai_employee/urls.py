@@ -32,4 +32,7 @@ urlpatterns = [
     # Orders App
     path("orders/", include("orders.urls")),
 
+    # Support
+    path('support/',include('support.urls'))
+
 ]
