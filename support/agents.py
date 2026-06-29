@@ -21,7 +21,7 @@ Your responsibilities:
 - Always use your tools to gather facts before responding
 - Check order details when customer mentions their order
 - Check refund history before making any refund decisions
-- Be empahetic but honest
+- Be empathetic but honest
 - Provide professional conversation with less emojies
 
 
@@ -50,7 +50,7 @@ SUPPORT_TOOLS = [
             "properties": {
                 "order_id":{
                    "type" : "integer",
-                   "description" : "THe order ID to look up"
+                   "description" : "The order ID to look up"
                 }
             },
             "required":["order_id"]
@@ -107,7 +107,7 @@ def execute_tool(tool_name, tool_input):
 
 
 # 4. AGENT LOOP -->This iterate until the loops task is done
-def run_support_agent(user_message, conversation_id): # this function is to give the user message to the LLM 
+def run_support_agent(user_message, conversation_id, order_id,user_id): # this function is to give the user message to the LLM 
     conv = Conversation.objects.get(id = conversation_id)
 
     conversation_messages = []
@@ -118,14 +118,52 @@ def run_support_agent(user_message, conversation_id): # this function is to give
             "content" : msg.content
         })
 
-    # sen this conversation to LLM
-    response = client.messages.create(
-        model = model,
-        max_tokens = 1024,
-        system = SUUPORT_SYSYTEM_PROMPT,
-        messages = conversation_messages
-    )
+    while True:
+        # sen this conversation to LLM
+        response = client.messages.create(
+            model = model,
+            max_tokens = 1024,
+            system = SUUPORT_SYSYTEM_PROMPT + f"\n\nContext: This conversation is about Order # {order_id}, user: {user_id}",
+            tools=SUPPORT_TOOLS, # putting the support functions here
+            messages = conversation_messages
+        )
 
-    final_text = response.content[0].text
+        print('Stop Reson ==>', response.stop_reason)
+        print('Content ==>',response.content)
 
-    return final_text
+        if response.stop_reason == 'tool_use':
+            # store the tool use blocks
+            tool_results = []
+
+            for block in response.content:
+                if block.type == 'tool_use':
+                    print('Tool Call ==>',block.name)
+                    print('Tool Input ==>',block.input)
+
+                    
+                    # execute the tool
+                    result = execute_tool(block.name, block.input)
+                    print('Tool Result ==>', result)
+
+
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id" : block.id,
+                        "content" : str(result)
+                    })
+            
+            conversation_messages.append({
+                "role" : "assistant",
+                "content" : response.content,
+            })
+
+            conversation_messages.append({
+                "role" : "user",
+                "content" : tool_results
+            })
+        
+        else:
+            return response.content[0].text
+
+
+        

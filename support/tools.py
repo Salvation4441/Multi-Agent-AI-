@@ -58,7 +58,7 @@ def get_refund_history(user_id):
 def check_delivery_status(tracking_number, carrier):
     default_response = {
         "status": "Unknown",
-        "last_location": "TRacking info unavaliable",
+        "last_location": "Tracking info unavaliable",
         "last_update": "N/A",
         "estimated_delivery": "Contact carrier directly",
         "delay_reason": "No update from carrier",

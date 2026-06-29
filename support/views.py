@@ -9,9 +9,9 @@ from support.agents import run_support_agent
 def chat(request, order_id):
     if request.method == "POST":
         data = json.loads(request.body)
-        user_messgae = data.get("message")
+        user_message = data.get("message")
 
-        if not user_messgae:
+        if not user_message:
             return JsonResponse({"error" : "Empty message"}, status=400)
         
         order = get_object_or_404(Order, id = order_id, user = request.user)
@@ -19,10 +19,10 @@ def chat(request, order_id):
         conversation, created = Conversation.objects.get_or_create(user = request.user, order=order)
 
         # store the message
-        Message.objects.create(conversation = conversation, role="user", content= user_messgae)
+        Message.objects.create(conversation = conversation, role="user", content= user_message)
 
         # send user message and conversation LLM
-        reply = run_support_agent(user_messgae, conversation.id)
+        reply = run_support_agent(user_message, conversation.id, order.id,request.user.id)
 
         # store the LLM reply
         Message.objects.create(conversation=conversation, role="assistant", content = reply)
