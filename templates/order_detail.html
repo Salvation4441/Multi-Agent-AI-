@@ -230,6 +230,7 @@
       background-color: #f3f4f6;
       border-radius: 0 10px 10px 10px;
       margin-right:auto;
+      white-space: pre-line;
     }
 
   </style>
@@ -335,9 +336,25 @@
 
          <!-- chat area -->
           <div id="chat-messages" class="chat-messages p-3 d-flex flex-column gap-2">
+            {% if conversation %}
+            <!-- print the previous message -->
+             {% for message in previous_messages %}
+                {% if message.role == "user" %}
+                  <div class="customer-message p-2 px-3" style="font-size:13px; max-width: 80%;">
+                     {{message.content}}
+                  </div>
+                {% else %}
+                  <div class="agent-message p-2 px-3" style="font-size:13px; max-width: 80%;">
+                    {{message.content}}
+                  </div>
+                {% endif %}
+             {% endfor %}
+
+            {% else %}
             <div class="agent-message p-2 px-3" style="font-size:13px; max-width: 80%;">
-              Hi User, how can I assist you with your order today?
+              Hi {{request.user.first_name}}, how can I assist you with your order today?
             </div>
+            {% endif %}
 
             <div>
 
