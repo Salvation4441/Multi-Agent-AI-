@@ -69,3 +69,8 @@ def check_delivery_status(tracking_number, carrier):
     result["carrier"] = carrier
     return result
 
+# ------------------------
+# Manager Agent as a tool
+# ------------------------
+def run_manager_agent():
+    pass
