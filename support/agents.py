@@ -155,8 +155,8 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
             messages = conversation_messages
         )
 
-        print('Stop Reson ==>', response.stop_reason)
-        print('Content ==>',response.content)
+        # print('Stop Reson ==>', response.stop_reason)
+        # print('Content ==>',response.content)
 
         if response.stop_reason == 'tool_use':
             # store the tool use blocks
@@ -164,13 +164,13 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
 
             for block in response.content:
                 if block.type == 'tool_use':
-                    print('Tool Call ==>',block.name)
-                    print('Tool Input ==>',block.input)
+                    # print('Tool Call ==>',block.name)
+                    # print('Tool Input ==>',block.input)
 
                     
                     # execute the tool
                     result = execute_tool(block.name, block.input)
-                    print('Tool Result ==>', result)
+                    # print('Tool Result ==>', result)
 
 
                     tool_results.append({
@@ -193,4 +193,43 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
             return response.content[0].text
 
 
-        
+# 5. MANAGER LOOP
+def run_manager_agent(case_summary):
+    manager_messages = [
+        {
+            'role':'user', #user is the task giver
+            'content' : case_summary
+        }
+    ]
+
+    while True:
+        response = client.messages.create(
+            model = model,
+            max_tokens=1024,
+            system = MANAGER_SYSYTEM_PROMPT,
+            messages = manager_messages
+        )
+
+        if response.stop_reason == 'tool_use':
+            tool_results = []
+            for block in response.content:
+                if block.type == 'tool_use':
+                    # execute the tool 
+                    result = execute_tool(block.name,block.input)
+                    
+                    tool_results.append({
+                        'type': 'tool_use',
+                        'tool_use_id' : block.id,
+                        'content' : result
+                    })
+            manager_messages.append({
+                'role' : 'assistant',
+                'content' : response.content
+            })
+
+            manager_messages.append({
+                'role' : 'user',
+                'content': tool_results
+            })
+        else:
+            return response.content[0].text
