@@ -119,6 +119,23 @@ SUPPORT_TOOLS = [
             },
             "required":["tracking_number","carrier"]
         }
+    },
+
+
+    # ecalate to manager
+    {
+        "name" : "escalate_to_manager",
+        "description" : "Escalate the case to the manager for a refund decision, Use this when customer request a refund or compensation. Prepare a detailed summary of the case including refund history,order details and customer complaints before escalating",
+        "input_schema":{
+            "type" : "object",
+            "properties" : {
+                "case_summary":{
+                    "type" : "string",
+                    "description" : "Complete case summary including order details, refund history,customer complaints and current conversation"
+                }
+            },
+            "required":["case_summary"]
+        }
     }
 ]
 
