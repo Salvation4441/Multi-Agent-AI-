@@ -148,6 +148,12 @@ def execute_tool(tool_name, tool_input):
         return get_refund_history(tool_input["user_id"])
     if tool_name == "check_delivery_status":
         return check_delivery_status(tool_input["tracking_number"],tool_input["carrier"])
+    if tool_name == "escalate_to_manager":
+        case_summary = tool_input["case_summary"]
+        print("Case Summary\n\n",case_summary)
+        decision = run_manager_agent(case_summary)
+        print("Decision\n\n",decision)
+        return decision
 
 
 # 4. AGENT LOOP -->This iterate until the loops task is done
