@@ -166,6 +166,28 @@ SUPPORT_TOOLS = [
 ]
 
 
+
+# RISK AGENT ----> Tool schema
+RISK_TOOLS = [
+    {
+        "name": "get_customer_risk_profile",
+        "description" : "Get the risk profile of a customer including order history,refund history,refund patterns and ratio. Use this to asses fraud risk.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "integer",
+                    "description": "The user ID to check the risk profile of"
+                }
+            },
+            "required": ["user_id"]
+        }
+    }
+]
+
+
+
+
 # 3. EXECUTE TOOLS --> This the bridge between claude and python function(tools) 
 def execute_tool(tool_name, tool_input):
     if tool_name == "get_order_details":
