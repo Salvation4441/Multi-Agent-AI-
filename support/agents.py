@@ -185,23 +185,51 @@ RISK_TOOLS = [
     }
 ]
 
-
+MANAGER_TOOLS = [
+    {
+        'name' : "assess_fraud_risk",
+        "description": "Consult the risk agent to assess fraud risk for a customer. Use this when refund request looks suspicious or customer has multiple refunds or complaints. Pass the user_id to get a risk verdict",
+        "input_schema":{
+            "type":"object",
+            "properties":{
+                "user_id" : {
+                    "type" : "integer",
+                    "description" : "The user ID to assess fraud risk for"
+                },
+            },
+            "required":["user_id"]
+        }
+    }
+]
 
 
 # 3. EXECUTE TOOLS --> This the bridge between claude and python function(tools) 
 def execute_tool(tool_name, tool_input):
     if tool_name == "get_order_details":
         return get_order_details(tool_input["order_id"])
+
     if tool_name == "get_refund_history":
         return get_refund_history(tool_input["user_id"])
+    
     if tool_name == "check_delivery_status":
         return check_delivery_status(tool_input["tracking_number"],tool_input["carrier"])
+
     if tool_name == "escalate_to_manager":
         case_summary = tool_input["case_summary"]
         print("Case Summary\n\n",case_summary)
         decision = run_manager_agent(case_summary)
         print("Decision\n\n",decision)
         return decision
+
+    if tool_name == "assess_fraud_risk":
+        user_id = tool_input['user_id']
+        print("Consulting risk agent for user",user_id)
+        verdict = run_risk_agent(user_id)
+        print("Verdict\n\n",verdict)
+        return verdict
+
+    if tool_name == "get_customer_risk_profile":
+        return get_customer_risk_profile(tool_input["user_id"])
 
 
 # 4. AGENT LOOP -->This iterate until the loops task is done
@@ -278,6 +306,7 @@ def run_manager_agent(case_summary):
             model = model,
             max_tokens=1024,
             system = MANAGER_SYSYTEM_PROMPT,
+            tools=MANAGER_TOOLS,
             messages = manager_messages
         )
 
