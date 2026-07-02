@@ -70,7 +70,40 @@ def check_delivery_status(tracking_number, carrier):
     return result
 
 # ------------------------
-# Manager Agent as a tool
+# Customer risk profile as a tool
 # ------------------------
-def run_manager_agent():
-    pass
+
+def get_customer_risk_profile(user_id):
+    refunds = RefundRequest.objects.filter(user_id=user_id)
+    orders = Order.objects.filter(user_id=user_id)
+
+    recent_refunds = refunds.filter(created_at__gte = timezone.now() - timedelta(days=90)) #getting refunds greater than 90 days old refunds
+
+    denied = refunds.filter(status="denied").count()
+    approved = refunds.filter(status="approved").count()
+    pending = refunds.filter(status="pending").count()
+
+
+    total_orders = orders.count()
+    total_refunds = refunds.count()
+
+
+    if total_orders > 0:
+        refund_to_order_ratio = round(total_refunds / total_orders, 2)
+    else:
+        refund_to_order_ratio = 0
+
+    return{
+        "user_id" : user_id,
+        "total_orders" : total_orders,
+        "total_refund_request" : total_refunds,
+        "denied_refunds" : denied,
+        "approved_refunds" : approved,
+        "pending_refunds" : pending,
+        "refund_to_order_ratio" : refund_to_order_ratio,
+        "refunds_last_90_days" : recent_refunds,
+    }
+    
+
+    
+    
