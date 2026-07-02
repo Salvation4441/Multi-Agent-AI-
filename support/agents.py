@@ -304,3 +304,49 @@ def run_manager_agent(case_summary):
             })
         else:
             return response.content[0].text
+
+
+
+# 6. RISK AGENT LOOP
+def run_risk_agent(user_id):
+    risk_messages = [
+        {
+            "role" : "user",
+            "content": f"Please assess the fraud risk for user #{user_id}. Use your tools to check order history, refund patterns, and any other relevant information. Provide a risk score and recommendation.",
+        }
+    ]
+
+    while True:
+        response = client.messages.create(
+            model = model,
+            max_tokens = 1024,
+            system = RISK_SYSTEM_PROMPT,
+            tools=RISK_TOOLS,
+            messages = risk_messages,
+        )
+
+        if response.stop_reason == 'tool_use':
+            tool_results = []
+            for block in response.content:
+                if block.type == 'tool_use':
+                    result = execute_tool(block.name,block.input)
+                    print('result of tool ==> ',result)
+
+                    tool_results.append({
+                        "type": 'tool_result',
+                        "tool_use_id" : block.id,
+                        'content' : result
+                    })
+
+
+            risk_messages.append({
+                'role':'assistant',
+                'content' : response.content
+            })
+
+            risk_messages.append({
+                'role':'user',
+                'content' : tool_results
+            })
+        else:
+            return response.content[0].text
