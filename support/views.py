@@ -5,7 +5,8 @@ import time
 from .models import *
 from support.agents import run_support_agent
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import staff_member_required
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 
 # Create your views here.
@@ -34,6 +35,7 @@ def chat(request, order_id):
         
         # time.sleep(5);
         return JsonResponse({"reply" : reply})
+
 
 
 @staff_member_required

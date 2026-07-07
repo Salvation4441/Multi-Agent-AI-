@@ -428,7 +428,7 @@
       // send message to django view
       // from frontend  to backend
       try{
-        const response = await fetch("/support/chat/{{order.id}}/", {
+        const response = await fetch("{% url 'chat' order.id %}", {
           method : "POST",
           headers : {
             "Content-Type" : "application/json",

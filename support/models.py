@@ -16,6 +16,17 @@ class Conversation(models.Model):
     def __str__(self):
         return f"Conversation {self.id} by {self.user.username} / Order {self.order.id}"
 
+    # check if the manager was involved in this conversation
+    @property
+    def manager_involved(self):
+        return self.agentlogs.filter(event_type="manager").exists()
+
+
+    # risk
+    @property
+    def risk_involved(self):
+        return self.agentlogs.filter(event_type="risk").exists()
+
 
 
 # -------------------------
@@ -35,7 +46,6 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message {self.id} in Conversation {self.content[:50]} by {self.role}"
-    
 
 # -------------------------
 # Agent Log MODELS

@@ -22,7 +22,11 @@
         </li>
       </ul>
       <hr/>
-      <span style="font-size:11px;opacity:0.5;">Logged in as admin</span>
+      <span style="font-size:11px;opacity:0.5;">{{ request.user.username }}</span>
+      <form method="POST" action="{% url 'logout' %}" style="margin-top:8px;">
+        {% csrf_token %}
+        <button type="submit" style="font-size:11px;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:0;">Logout</button>
+      </form>
     </div>
 
     <!-- Main Content -->
@@ -38,6 +42,8 @@
                 <th class="px-4">Customer</th>
                 <th>Order</th>
                 <th>Product</th>
+                <th>Manager Invoved</th>
+                <th>Risk Invoved</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th></th>
@@ -49,7 +55,35 @@
                   <td class="px-4">{{convo.user.first_name}} {{convo.user.last_name}}</td>
                   <td>{{convo.order.id}}</td>
                   <td>{{convo.order.product_name}}</td>
-                  <td>{{convo.order.status}}</td>
+                  <td>
+                    {% if convo.manager_involved %}
+                      <span class="badge bg-success">Yes</span>
+                    {% else %}
+                      <span class="badge bg-danger">No</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                  {% if convo.risk_involved %}
+                      <span class="badge bg-success">Yes</span>
+                    {% else %}
+                      <span class="badge bg-danger">No</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if convo.order.status == 'pending' %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif convo.order.status == 'dispatched' %}
+                      <span class="badge bg-warning text-dark">Dispatched</span>
+                    {% elif convo.order.status == 'shipped' %}
+                      <span class="badge bg-primary">Shipped</span>
+                    {% elif convo.order.status == 'delivered' %}
+                      <span class="badge bg-success">Delivered</span>
+                    {% elif convo.order.status == 'cancelled' %}
+                      <span class="badge bg-danger">Cancelled</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ convo.order.status }}</span>
+                    {% endif %}
+                  </td>
                   <td class="text-muted">{{convo.order.created_at}}</td>
                   <td><a href="#" class="btn btn-sm btn-outline-secondary">View</a></td>
                 </tr>
