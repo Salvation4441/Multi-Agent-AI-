@@ -48,3 +48,19 @@ def dashboard(request):
     }
 
     return render(request,'support/dashboard.html',context)
+
+
+
+
+# COnversations
+def conversation_details(request,conversation_id):
+    conversation = get_object_or_404(Conversation, id = conversation_id)
+    messages = conversation.messages.order_by('created_at')
+    agentlogs = conversation.agentlogs.order_by('created_at')
+
+    context ={
+        "conversation" : conversation,
+        "messages" : messages,
+        "agentlogs" : agentlogs,
+    }
+    return render(request, 'support/conversation_detail.html', context)
