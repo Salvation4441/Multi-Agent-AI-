@@ -4,8 +4,12 @@ from django.http import JsonResponse
 import time
 from .models import *
 from support.agents import run_support_agent
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import staff_member_required
+
 
 # Create your views here.
+@login_required
 def chat(request, order_id):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -30,3 +34,15 @@ def chat(request, order_id):
         
         # time.sleep(5);
         return JsonResponse({"reply" : reply})
+
+
+@staff_member_required
+def dashboard(request):
+    # display all the conversation list
+    conversations = Conversation.objects.all().order_by('-created_at')
+
+    context ={
+        "conversations" : conversations,
+    }
+
+    return render(request,'support/dashboard.html',context)

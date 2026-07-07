@@ -18,6 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
+from support import views as support_views
 
 
 urlpatterns = [
@@ -33,6 +34,6 @@ urlpatterns = [
     path("orders/", include("orders.urls")),
 
     # Support
-    path('support/',include('support.urls'))
+    path('', include('support.urls')),
 
 ]

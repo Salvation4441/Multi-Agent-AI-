@@ -44,22 +44,16 @@
               </tr>
             </thead>
             <tbody style="font-size:13px;" class="align-middle">
-              <tr>
-                <td class="px-4">Rathan Kumar</td>
-                <td>Order #1</td>
-                <td>CoolBreeze 1.5 Ton 5 Star Inverter Split AC</td>
-                <td><span class="badge bg-warning text-dark">Dispatched</span></td>
-                <td class="text-muted">02 Jun 2026</td>
-                <td><a href="#" class="btn btn-sm btn-outline-secondary">View</a></td>
-              </tr>
-              <tr>
-                <td class="px-4">Priya Sharma</td>
-                <td>Order #6</td>
-                <td>CoolBreeze 2 Ton 5 Star Inverter Cassette AC</td>
-                <td><span class="badge bg-primary">Pending</span></td>
-                <td class="text-muted">01 Jun 2026</td>
-                <td><a href="#" class="btn btn-sm btn-outline-secondary">View</a></td>
-              </tr>
+              {% for convo in conversations %}
+                 <tr>
+                  <td class="px-4">{{convo.user.first_name}} {{convo.user.last_name}}</td>
+                  <td>{{convo.order.id}}</td>
+                  <td>{{convo.order.product_name}}</td>
+                  <td>{{convo.order.status}}</td>
+                  <td class="text-muted">{{convo.order.created_at}}</td>
+                  <td><a href="#" class="btn btn-sm btn-outline-secondary">View</a></td>
+                </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
