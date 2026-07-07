@@ -12,7 +12,7 @@
       </div>
 
       <!-- Two Column Layout -->
-      <div class="row g-3" style="height:calc(100vh - 160px);">
+      <div class="row g-3" style="height:calc(100vh - 190px);">
 
         <!-- Left: Chat Transcript -->
         <div class="col-md-6">
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Right: Agent Activity -->
-        <div class="col-md-6">
+        <div class="col-md-6" style="max-height: calc(100vh - 190px);">
           <div class="card h-100">
             <div class="card-header d-flex align-items-center gap-2" style="font-size:13px;">
               <div style="width:8px;height:8px;border-radius:50%;background:#1D9E75;"></div>
@@ -58,46 +58,27 @@
             <div class="card-body overflow-auto d-flex flex-column gap-3">
 
               <!-- Log entry -->
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <span class="badge bg-primary" style="font-size:10px;">tool_call</span>
-                  <span class="text-muted" style="font-size:11px;">10:30 AM</span>
+               {% for log in agentlogs %}
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    {% if log.event_type == "tool_call" %}
+                      <span class="badge bg-primary" style="font-size:10px;">tool_call</span>
+                    {% elif log.event_type == "tool_result" %}
+                      <span class="badge bg-success" style="font-size:10px;">tool_result</span>
+                    {% elif log.event_type == "support" %}
+                      <span class="badge bg-info" style="font-size:10px;">support</span>
+                    {% elif log.event_type == "manager" %}
+                      <span class="badge bg-warning" style="font-size:10px;">manager</span>
+                    {% elif log.event_type == "risk" %}
+                      <span class="badge bg-danger" style="font-size:10px;">risk</span>
+                    {% else %}
+                      <span class="badge bg-secondary" style="font-size:10px;">final</span>
+                    {% endif %}
+                    <span class="text-muted" style="font-size:11px;">{{log.created_at | date:"H:i A"}}</span>
+                  </div>
+                  <p class="mb-0 text-muted" style="font-size:12px;">{{log.message}}</p>
                 </div>
-                <p class="mb-0 text-muted" style="font-size:12px;">Calling get_order_details with order_id 1</p>
-              </div>
-
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <span class="badge bg-secondary" style="font-size:10px;">tool_result</span>
-                  <span class="text-muted" style="font-size:11px;">10:30 AM</span>
-                </div>
-                <p class="mb-0 text-muted" style="font-size:12px;">get_order_details returned: status dispatched, carrier BlueDart</p>
-              </div>
-
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <span class="badge bg-warning text-dark" style="font-size:10px;">manager</span>
-                  <span class="text-muted" style="font-size:11px;">10:31 AM</span>
-                </div>
-                <p class="mb-0 text-muted" style="font-size:12px;">Case escalated to manager for refund decision</p>
-              </div>
-
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <span class="badge bg-danger" style="font-size:10px;">risk</span>
-                  <span class="text-muted" style="font-size:11px;">10:31 AM</span>
-                </div>
-                <p class="mb-0 text-muted" style="font-size:12px;">Risk assessment: HIGH risk detected</p>
-              </div>
-
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <span class="badge bg-success" style="font-size:10px;">final</span>
-                  <span class="text-muted" style="font-size:11px;">10:32 AM</span>
-                </div>
-                <p class="mb-0 text-muted" style="font-size:12px;">Final reply sent to customer</p>
-              </div>
-
+              {%endfor%}
             </div>
           </div>
         </div>
