@@ -1,11 +1,12 @@
 from django.shortcuts import render,get_object_or_404
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse,StreamingHttpResponse
 import time
 from .models import *
 from support.agents import run_support_agent
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from .event_queue import subscribe, unsubscribe, publish, DONE
 
 
 
@@ -52,7 +53,7 @@ def dashboard(request):
 
 
 
-# COnversations
+# Conversations
 def conversation_details(request,conversation_id):
     conversation = get_object_or_404(Conversation, id = conversation_id)
     messages = conversation.messages.order_by('created_at')
@@ -64,3 +65,25 @@ def conversation_details(request,conversation_id):
         "agentlogs" : agentlogs,
     }
     return render(request, 'support/conversation_detail.html', context)
+
+
+
+# Conversation Stream
+def conversation_stream(request, conversation_id):
+    # yield keyword make a function become a generated function
+    # generator function used for streaming SSE
+    #  generated function will give u you the response chunk by chunk
+
+    def event_stream(conversation_id):
+        q = subscribe(conversation_id)
+
+        try:
+            while True:
+                event = q.get() # this will wait for the next event
+                # if event is DONE:
+                #     break
+                yield f"data: {json.dumps(event)}\n\n"
+        finally:
+            unsubscribe(conversation_id, q)
+
+    return StreamingHttpResponse(event_stream(conversation_id),content_type="text/event-stream")
