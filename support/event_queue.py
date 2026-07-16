@@ -28,4 +28,10 @@ def unsubscribe(conversation_id, queue):
 
 
 def publish(conversation_id, event):
-    pass
+    if conversation_id in subscribers:
+        for q in subscribers[conversation_id]:
+            q.put(event)
+        
+
+    # Sentinel value it tells the SSE(Server Sent Event) connection to stop or close
+    DONE = {"type": "done"}
