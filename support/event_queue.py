@@ -17,10 +17,14 @@ def subscribe(conversation_id):
 
 
 
-
-
 def unsubscribe(conversation_id, queue):
-    pass
+    if conversation_id in subscribers:
+        subscribers[conversation_id].remove(queue)
+        # if this was the last subscriber, remove the conversation from the dict
+        if not subscribers[conversation_id]:
+            del subscribers[conversation_id]
+
+
 
 
 def publish(conversation_id, event):
