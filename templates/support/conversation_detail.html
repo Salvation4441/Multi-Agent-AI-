@@ -12,15 +12,15 @@
       </div>
 
       <!-- Two Column Layout -->
-      <div class="row g-3" style="height:calc(100vh - 190px);">
+      <div class="row g-3">
 
-        <!-- Left: Chat Transcript -->
-        <div class="col-md-6">
+        <!-- Left: C  hat Transcript -->
+        <div class="col-md-6" style="max-height: calc(100vh - 190px); overflow: hidden;">
           <div class="card h-100">
             <div class="card-header fw-semibold" style="font-size:13px;">
               Chat Transcript
             </div>
-            <div class="card-body overflow-auto d-flex flex-column gap-3">
+            <div class="card-body overflow-auto d-flex flex-column gap-3" id="chat-transcript">
 
               <!-- Customer message -->
                {% for msg in messages %}
@@ -52,10 +52,11 @@
         <div class="col-md-6" style="max-height: calc(100vh - 190px);">
           <div class="card h-100">
             <div class="card-header d-flex align-items-center gap-2" style="font-size:13px;">
-              <div style="width:8px;height:8px;border-radius:50%;background:#1D9E75;"></div>
+              <div style="width:8px;height:8px;border-radius:50%;background:hsl(161, 69%, 37%);"></div>
               <span class="fw-semibold">Agent Activity</span>
             </div>
-            <div class="card-body overflow-auto d-flex flex-column gap-3">
+
+            <div class="card-body overflow-auto d-flex flex-column gap-3" id="agent-activity">
 
               <!-- Log entry -->
                {% for log in agentlogs %}
@@ -85,4 +86,27 @@
 
       </div>
     </div>
+    
+
+    <script>
+      function scrollToBottom() {
+        const chatTranscript = document.getElementById("chat-transcript");
+        const agentActivity = document.getElementById("agent-activity");
+
+        if (chatTranscript) {
+          chatTranscript.scrollTop = chatTranscript.scrollHeight;
+        }
+        if (agentActivity) {
+          agentActivity.scrollTop = agentActivity.scrollHeight;
+        }
+      }
+
+      // Wait for full page load (including subresources) then
+      // defer twice via rAF to ensure flex layout heights are resolved.
+      window.addEventListener("load", function () {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(scrollToBottom);
+        });
+      });
+    </script>
   {%endblock%}
