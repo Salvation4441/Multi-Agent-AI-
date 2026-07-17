@@ -94,15 +94,26 @@ def get_customer_risk_profile(user_id):
     else:
         refund_to_order_ratio = 0
 
-    return{
-        "user_id" : user_id,
-        "total_orders" : total_orders,
-        "total_refund_request" : total_refunds,
-        "denied_refunds" : denied,
-        "approved_refunds" : approved,
-        "pending_refunds" : pending,
-        "refund_to_order_ratio" : refund_to_order_ratio,
-        "refunds_last_90_days" : recent_refunds,
+    recent_refunds_list = [
+        {
+            "order_id": r.order.id,
+            "product": r.order.product_name,
+            "reason": r.reason,
+            "status": r.status,
+            "requested_on": r.created_at.strftime("%d %b %Y"),
+        }
+        for r in recent_refunds
+    ]
+
+    return {
+        "user_id": user_id,
+        "total_orders": total_orders,
+        "total_refund_request": total_refunds,
+        "denied_refunds": denied,
+        "approved_refunds": approved,
+        "pending_refunds": pending,
+        "refund_to_order_ratio": refund_to_order_ratio,
+        "refunds_last_90_days": recent_refunds_list,
     }
     
 

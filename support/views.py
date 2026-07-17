@@ -6,7 +6,7 @@ from .models import *
 from support.agents import run_support_agent
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from .event_queue import subscribe, unsubscribe, publish, DONE
+from .event_queue import subscribe, unsubscribe, publish
 
 
 
@@ -54,6 +54,7 @@ def dashboard(request):
 
 
 # Conversations
+@staff_member_required
 def conversation_details(request,conversation_id):
     conversation = get_object_or_404(Conversation, id = conversation_id)
     messages = conversation.messages.order_by('created_at')
@@ -69,6 +70,7 @@ def conversation_details(request,conversation_id):
 
 
 # Conversation Stream
+@staff_member_required
 def conversation_stream(request, conversation_id):
     # yield keyword make a function become a generated function
     # generator function used for streaming SSE

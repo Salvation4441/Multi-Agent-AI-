@@ -2,6 +2,7 @@ from anthropic import Anthropic
 from django.conf import settings
 from .tools import *
 from . models import *
+from .event_queue import publish
 
 
 # initializing anthropic client
@@ -252,7 +253,7 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
         response = client.messages.create(
             model = model,
             max_tokens = 1024,
-            system = SUUPORT_SYSYTEM_PROMPT + f"\n\nContext: This conversation is about Order # {order_id}, user: {user_id}",
+            system = SUPPORT_SYSTEM_PROMPT + f"\n\nContext: This conversation is about Order # {order_id}, user: {user_id}",
             tools=SUPPORT_TOOLS, # putting the support functions here
             messages = conversation_messages
         )
@@ -277,7 +278,7 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
                     )
                     
                     # execute the tool
-                    result = execute_tool(block.name, block.input)
+                    result = execute_tool(block.name, block.input, conversation_id)
 
                     # store log result after executing
                     AgentLog.objects.create(
@@ -304,13 +305,20 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
             })
         
         else:
+
+            final_reply = response.content[0].text
+
+            # publish final reply
+            event = {"type":"final","message" : final_reply}
+            publish(conversation_id,event)
+            
             # store the final response
             AgentLog.objects.create(
                 conversation=conv,
                 event_type="final",
-                message=response.content[0].text
+                message=final_reply
             )
-            return response.content[0].text
+            return final_reply
 
 
 # 5. MANAGER LOOP

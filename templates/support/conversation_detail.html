@@ -89,6 +89,16 @@
     
 
     <script>
+
+      const conversationID = {{conversation.id}};
+      const source = new EventSource(`/dashboard/stream/${conversationID}/`);
+
+      source.onmessage = (event) => {
+        console.log("Event data : ",event.data)
+      }
+
+
+
       function scrollToBottom() {
         const chatTranscript = document.getElementById("chat-transcript");
         const agentActivity = document.getElementById("agent-activity");
