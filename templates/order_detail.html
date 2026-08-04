@@ -425,6 +425,14 @@
       // show typing here after 2 seconds
       const typingTimeout =  setTimeout(() => showTyping(), 1000);
 
+
+
+      // get active token from hidden input or cookie
+      const getCsrfToken = () => {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+         document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+      };
+
       // send message to django view
       // from frontend  to backend
       try{
@@ -432,7 +440,8 @@
           method : "POST",
           headers : {
             "Content-Type" : "application/json",
-            "X-CSRFToken" : "{{ csrf_token }}"
+            // "X-CSRFToken" : "{{ csrf_token }}"
+            "X-CSRFToken" : getCsrfToken()
           },
           body : JSON.stringify({message: message })
         });

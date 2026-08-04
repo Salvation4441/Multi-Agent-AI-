@@ -3,6 +3,7 @@ from django.conf import settings
 from .tools import *
 from . models import *
 from .event_queue import publish
+import json
 
 
 # initializing anthropic client
@@ -208,32 +209,61 @@ MANAGER_TOOLS = [
 
 
 # 3. EXECUTE TOOLS --> This the bridge between claude and python function(tools) 
-def execute_tool(tool_name, tool_input,conversation_id=None):
-    if tool_name == "get_order_details":
-        return get_order_details(tool_input["order_id"])
+# def execute_tool(tool_name, tool_input,conversation_id=None):
+#     if tool_name == "get_order_details":
+#         return get_order_details(tool_input["order_id"])
 
-    if tool_name == "get_refund_history":
-        return get_refund_history(tool_input["user_id"])
+#     if tool_name == "get_refund_history":
+#         return get_refund_history(tool_input["user_id"])
     
-    if tool_name == "check_delivery_status":
-        return check_delivery_status(tool_input["tracking_number"],tool_input["carrier"])
+#     if tool_name == "check_delivery_status":
+#         return check_delivery_status(tool_input["tracking_number"],tool_input["carrier"])
 
-    if tool_name == "escalate_to_manager":
+#     if tool_name == "escalate_to_manager":
+#         case_summary = tool_input["case_summary"]
+#         print("Case Summary\n\n",case_summary)
+#         decision = run_manager_agent(case_summary,conversation_id)
+#         print("Decision\n\n",decision)
+#         return decision
+
+#     if tool_name == "assess_fraud_risk":
+#         user_id = tool_input['user_id']
+#         print("Consulting risk agent for user",user_id)
+#         verdict = run_risk_agent(user_id,conversation_id)
+#         print("Verdict\n\n",verdict)
+#         return verdict
+
+#     if tool_name == "get_customer_risk_profile":
+#         return get_customer_risk_profile(tool_input["user_id"])
+
+
+def execute_tool(tool_name, tool_input, conversation_id=None):
+    if tool_name == "get_order_details":
+        result = get_order_details(tool_input["order_id"])
+
+    elif tool_name == "get_refund_history":
+        result = get_refund_history(tool_input["user_id"])
+    
+    elif tool_name == "check_delivery_status":
+        result = check_delivery_status(tool_input["tracking_number"], tool_input["carrier"])
+
+    elif tool_name == "escalate_to_manager":
         case_summary = tool_input["case_summary"]
-        print("Case Summary\n\n",case_summary)
-        decision = run_manager_agent(case_summary,conversation_id)
-        print("Decision\n\n",decision)
-        return decision
-
-    if tool_name == "assess_fraud_risk":
+        result = run_manager_agent(case_summary, conversation_id)
+        
+    elif tool_name == "assess_fraud_risk":
         user_id = tool_input['user_id']
-        print("Consulting risk agent for user",user_id)
-        verdict = run_risk_agent(user_id,conversation_id)
-        print("Verdict\n\n",verdict)
-        return verdict
+        result = run_risk_agent(user_id, conversation_id)
 
-    if tool_name == "get_customer_risk_profile":
-        return get_customer_risk_profile(tool_input["user_id"])
+    elif tool_name == "get_customer_risk_profile":
+        result = get_customer_risk_profile(tool_input["user_id"])
+
+    else:
+        result = f"Unknown tool: {tool_name}"
+
+    if isinstance(result, (dict, list)):
+        return json.dumps(result)
+    return str(result)
 
 
 # 4. AGENT LOOP -->This iterate until the loops task is done
@@ -254,7 +284,7 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
             model = model,
             max_tokens = 1024,
             system = SUPPORT_SYSTEM_PROMPT + f"\n\nContext: This conversation is about Order # {order_id}, user: {user_id}",
-            tools=SUPPORT_TOOLS, # putting the support functions here
+            tools = SUPPORT_TOOLS, # putting the support functions here
             messages = conversation_messages
         )
 
@@ -367,7 +397,7 @@ def run_manager_agent(case_summary,conversation_id):
 
                     
                     tool_results.append({
-                        'type': 'tool_use',
+                        'type': 'tool_result',
                         'tool_use_id' : block.id,
                         'content' : result
                     })

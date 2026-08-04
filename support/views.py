@@ -10,7 +10,7 @@ from .event_queue import subscribe, unsubscribe, publish
 
 
 
-# Create your views here.
+
 @login_required
 def chat(request, order_id):
     if request.method == "POST":
