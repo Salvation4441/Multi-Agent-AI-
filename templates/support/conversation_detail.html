@@ -90,11 +90,36 @@
 
     <script>
 
+      // append the log message
+      function appendLog(type,message){
+        const agentActivity = document.getElementById("agent-activity");
+
+        const time = new Date().toLocaleTimeString([]);
+
+        agentActivity.insertAdjacentHTML('beforeend',
+        `
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-secondary" style="font-size:10px;">${type}</span>
+              <span class="text-muted" style="font-size:11px;">${time}</span>
+            </div>
+            <p class="mb-0 text-muted" style="font-size:12px;">${message}</p>
+          </div>
+        `
+        );
+        
+        agentActivity.scrollTop = agentActivity.scrollHeight;
+        
+      }
+
       const conversationID = {{conversation.id}};
       const source = new EventSource(`/dashboard/stream/${conversationID}/`);
 
-      source.onmessage = (event) => {
-        console.log("Event data : ",event.data)
+      source.onmessage = (e) => {
+        const event = JSON.parse(e.data);
+
+        // append the event message
+        appendLog(event.type,event.message);
       }
 
 
