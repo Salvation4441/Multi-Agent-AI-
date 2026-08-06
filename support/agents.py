@@ -374,6 +374,13 @@ def run_manager_agent(case_summary,conversation_id):
 
     convo = Conversation.objects.get(id = conversation_id)
 
+    event = {
+        "type":"manager",
+        "message" : f"Case recieved for review. Case Summary: {case_summary[:200]}"
+    }
+
+    publish(conversation_id, event)
+
     # logs
     AgentLog.objects.create(
         conversation = convo,
@@ -402,6 +409,15 @@ def run_manager_agent(case_summary,conversation_id):
             for block in response.content:
                 if block.type == 'tool_use':
 
+
+                    event = {
+                        "type":"tool_use",
+                        "message" : f"Consulting risk agent for fraud assessment.."
+                    }
+
+                    publish(conversation_id, event)
+
+
                     # log the tool calls before executing
                     AgentLog.objects.create(
                         conversation = convo,
@@ -411,8 +427,6 @@ def run_manager_agent(case_summary,conversation_id):
 
                     # execute the tool 
                     result = execute_tool(block.name,block.input,conversation_id)
-
-
                     
                     tool_results.append({
                         'type': 'tool_result',
@@ -430,14 +444,23 @@ def run_manager_agent(case_summary,conversation_id):
             })
         else:
 
+            decision = response.content[0].text
+            
+            event = {
+                "type": "manager",
+                "message": f"Manager Decision: {decision[:200]}"
+            }
+
+            publish(conversation_id,event)  
+
             # logging the final results
             AgentLog.objects.create(
                 conversation=convo,
                 event_type="manager",
-                message=response.content[0].text
+                message= f"Manager Decision: {decision[:200]}"
             )
             
-            return response.content[0].text
+            return decision
 
 
 
@@ -445,6 +468,14 @@ def run_manager_agent(case_summary,conversation_id):
 def run_risk_agent(user_id,conversation_id):
 
     convo = Conversation.objects.get(id=conversation_id)
+
+
+    event = {
+        "type" : "risk",
+        "message" : f"Starting fraud fraud assessment for user #{user_id}.."
+    }
+
+    publish(conversation_id, event)
 
     # log assessment started
     AgentLog.objects.create(
@@ -475,6 +506,13 @@ def run_risk_agent(user_id,conversation_id):
                 if block.type == 'tool_use':
 
 
+                    event = {
+                        "type" : "risk",
+                        "message" : f"Tool Call: {block.name} to get customer risk profile"
+                    }
+
+                    publish(conversation_id,event)
+
                     # logging the tool call before executing
                     AgentLog.objects.create(
                         conversation=convo,
@@ -504,6 +542,13 @@ def run_risk_agent(user_id,conversation_id):
         else:
 
             verdict = response.content[0].text
+
+            event = {
+                "type":"risk",
+                "message" : f"Assessment Complete: {verdict[:200]}",
+            }
+
+            publish(conversation_id,event)
 
             # logging final result
             AgentLog.objects.create(
