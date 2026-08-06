@@ -34,4 +34,4 @@ def publish(conversation_id, event):
         
 
     # Sentinel value it tells the SSE(Server Sent Event) connection to stop or close
-    DONE = {"type": "done"}
+DONE = {"type": "done"}

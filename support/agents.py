@@ -1,3 +1,4 @@
+from support.event_queue import DONE
 from anthropic import Anthropic
 from django.conf import settings
 from .tools import *
@@ -297,8 +298,12 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
 
             for block in response.content:
                 if block.type == 'tool_use':
-                    # print('Tool Call ==>',block.name)
-                    # print('Tool Input ==>',block.input)
+                    event = {
+                        "type" : "tool_call", 
+                        "message": f"Tool Call {block.name} with {block.input}"
+                    }
+
+                    publish(conversation_id, event)
 
                     # log tool call before executing
                     AgentLog.objects.create(
@@ -309,6 +314,15 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
                     
                     # execute the tool
                     result = execute_tool(block.name, block.input, conversation_id)
+
+
+                    # after getting the result we publish the event
+                    event = {
+                        "type" : "tool_result", 
+                        "message": f"Tool Result {block.name} with {str(result)[:200]}"
+                    }
+
+                    publish(conversation_id, event)
 
                     # store log result after executing
                     AgentLog.objects.create(
@@ -348,6 +362,10 @@ def run_support_agent(user_message, conversation_id, order_id,user_id): # this f
                 event_type="final",
                 message=final_reply
             )
+
+
+            publish(conversation_id,DONE)
+
             return final_reply
 
 

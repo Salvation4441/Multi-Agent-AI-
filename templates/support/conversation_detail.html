@@ -118,6 +118,10 @@
       source.onmessage = (e) => {
         const event = JSON.parse(e.data);
 
+        if(event.type == "done"){
+          return;
+        }
+
         // append the event message
         appendLog(event.type,event.message);
       }
