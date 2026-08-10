@@ -27,6 +27,19 @@ def chat(request, order_id):
         # store the message
         Message.objects.create(conversation = conversation, role="user", content= user_message)
 
+
+
+        event = {
+            "type" : "user_message",
+            "message" : user_message,
+            "name" : request.user.first_name
+        }
+
+
+        # publish the event
+        publish(conversation.id, event)
+
+
         # send user message and conversation LLM
         reply = run_support_agent(user_message, conversation.id, order.id,request.user.id)
 
