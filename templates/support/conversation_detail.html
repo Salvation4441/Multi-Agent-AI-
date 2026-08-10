@@ -94,13 +94,24 @@
       function appendLog(type,message){
         const agentActivity = document.getElementById("agent-activity");
 
-        const time = new Date().toLocaleTimeString([]);
+        const time = new Date().toLocaleTimeString([],{hour: '2-digit',minute:'2-digit',hour12: true});
+
+        const badgeColors = {
+          "tool_call" : "bg-primary",
+          "tool_result" : "bg-secondary",
+          "manager" : "bg-warning text-dark",
+          "risk" : "bg-danger text-light",
+          "support" : "bg-info",
+          "final" : "bg-success"
+        }
+
+        const badgeColor = badgeColors[type] || "bg-secondary";
 
         agentActivity.insertAdjacentHTML('beforeend',
         `
           <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-              <span class="badge bg-secondary" style="font-size:10px;">${type}</span>
+              <span class="badge ${badgeColor}" style="font-size:10px;">${type}</span>
               <span class="text-muted" style="font-size:11px;">${time}</span>
             </div>
             <p class="mb-0 text-muted" style="font-size:12px;">${message}</p>
