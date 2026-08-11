@@ -62,3 +62,7 @@ Assign roles,goals and task to each agent, Crew AI handles the teamwork. Think o
     - Goals : Agents are driven by individual objectives that serves the crew.
 
     - Task : Discrete unit of work assigned and tracked automatically.
+
+
+<!-- pip freeze  >  requirements.txt   (To install all libraries) -->
+<!-- pip install -r requirements.txt   (To install all libraries) -->
