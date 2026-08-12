@@ -1,1 +1,1 @@
-web: gunicorn ai_employee.wsgi
+web: gunicorn ai_employee.wsgi --bind 0.0.0.0:$PORT
