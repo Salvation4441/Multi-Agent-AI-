@@ -142,7 +142,5 @@ CLAUDE_MODEL = config("CLAUDE_MODEL")
 
 
 # trust domains for web deployment
-TRUSTED_DOMAINS = ["https://multi-agent-ai-production-2413.up.railway.app/"]
-
-CSRF_TRUSTED_ORIGINS = TRUSTED_DOMAINS
+CSRF_TRUSTED_ORIGINS  = ["https://multi-agent-ai-production-2413.up.railway.app"]
 
