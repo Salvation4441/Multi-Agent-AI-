@@ -21,12 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-default-secret-key-change-in-railway")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = [host.strip() for host in config("ALLOWED_HOSTS", default="*").split(",") if host.strip()]
+
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
 
@@ -82,13 +83,14 @@ WSGI_APPLICATION = "ai_employee.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST"),
-        "PORT": config("DB_PORT"),
+        "NAME": config("DB_NAME", default="ai_db"),
+        "USER": config("DB_USER", default="root"),
+        "PASSWORD": config("DB_PASSWORD", default=""),
+        "HOST": config("DB_HOST", default="localhost"),
+        "PORT": config("DB_PORT", default="3306"),
     }
 }
+
 
 
 # Password validation
@@ -137,5 +139,5 @@ LOGOUT_REDIRECT_URL = "/login/"
 LOGIN_URL = "/login/"
 
 
-CLAUDE_API_KEY = config("CLAUDE_API_KEY")
-CLAUDE_MODEL = config("CLAUDE_MODEL")
+CLAUDE_API_KEY = config("CLAUDE_API_KEY", default="")
+CLAUDE_MODEL = config("CLAUDE_MODEL", default="claude-3-5-sonnet-20241022")
