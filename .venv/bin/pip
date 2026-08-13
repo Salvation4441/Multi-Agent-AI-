@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/run/media/gi-akce/New Volume/Multi-Agent-AI-/.venv/bin/python3.11" "$0" "$@"
+'''exec' "/run/media/gi-akce/New Volume/Multi-Agent-AI-/.venv/bin/python" "$0" "$@"
 ' '''
 import sys
 from pip._internal.cli.main import main
