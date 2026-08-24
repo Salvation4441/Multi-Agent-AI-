@@ -209,35 +209,6 @@ MANAGER_TOOLS = [
 ]
 
 
-# 3. EXECUTE TOOLS --> This the bridge between claude and python function(tools) 
-# def execute_tool(tool_name, tool_input,conversation_id=None):
-#     if tool_name == "get_order_details":
-#         return get_order_details(tool_input["order_id"])
-
-#     if tool_name == "get_refund_history":
-#         return get_refund_history(tool_input["user_id"])
-    
-#     if tool_name == "check_delivery_status":
-#         return check_delivery_status(tool_input["tracking_number"],tool_input["carrier"])
-
-#     if tool_name == "escalate_to_manager":
-#         case_summary = tool_input["case_summary"]
-#         print("Case Summary\n\n",case_summary)
-#         decision = run_manager_agent(case_summary,conversation_id)
-#         print("Decision\n\n",decision)
-#         return decision
-
-#     if tool_name == "assess_fraud_risk":
-#         user_id = tool_input['user_id']
-#         print("Consulting risk agent for user",user_id)
-#         verdict = run_risk_agent(user_id,conversation_id)
-#         print("Verdict\n\n",verdict)
-#         return verdict
-
-#     if tool_name == "get_customer_risk_profile":
-#         return get_customer_risk_profile(tool_input["user_id"])
-
-
 def execute_tool(tool_name, tool_input, conversation_id=None):
     if tool_name == "get_order_details":
         result = get_order_details(tool_input["order_id"])

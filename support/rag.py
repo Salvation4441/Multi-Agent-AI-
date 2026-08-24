@@ -1,5 +1,6 @@
 # PHASE 1
 
+from anthropic.lib import credentials
 import chromadb
 from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 import os
@@ -69,6 +70,23 @@ def load_documents():
     
 
     print(f"Loaded {len(documents)} documents into ChromaDB")
+
+
+# PHASE 2 --- > SEARCH PHASE
+def search_knowledge_base(query):
+    results = collection.query(query_texts=[query],n_results=3)
+
+    if not results["documents"][0]:
+        return "No relevant documents found in compant documents."
+
+
+    matched_chunks = "\n\n".join(results["documents"][0])
+
+    return matched_chunks
+    
+    
+
+
 
 
 
