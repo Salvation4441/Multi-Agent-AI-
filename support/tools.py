@@ -3,6 +3,7 @@ from orders.models import Order,RefundRequest
 from django.utils import timezone
 from datetime import timedelta
 from .tracking_data import DELIVERY_DATA 
+from .rag import search_knowledge_base as rag_search
 
 
 # Creating tools to help the agent to do its work faster
@@ -116,6 +117,13 @@ def get_customer_risk_profile(user_id):
         "refunds_last_90_days": recent_refunds_list,
     }
     
+
+# creating wrapper function for rag
+def sarch_knowledge_base(query):
+    result = rag_search(query)
+    return {"result":result}
+
+
 
     
     

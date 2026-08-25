@@ -168,6 +168,22 @@ SUPPORT_TOOLS = [
             },
             "required":["case_summary"]
         }
+    },
+
+    # knowledge base search
+    {
+        "name" : "search_knowledge_base",
+        "description" : "Search CoolBreze AC documents including refund policy, warranty policy and product FAQs. Use this this when customer ask about company policies, warrant coverage, warranty claims, refund eligibility, or  any general product information",
+        "input_schema" : {
+            "type" : "object",
+            "properties" : {
+                "query" : {
+                    "type" : "string",
+                    "description" : "The search query to find information from the company policy documents. Be specific for example 'refund eligibility within 30 days' instead of just 'refund' "
+                }
+            },
+            "required" : ["query"]
+        }
     }
 ]
 
