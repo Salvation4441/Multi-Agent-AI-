@@ -5,6 +5,7 @@ from .tools import *
 from . models import *
 from .event_queue import publish
 import json
+from .tools import search_knowledge_base
 
 
 # initializing anthropic client
@@ -245,6 +246,9 @@ def execute_tool(tool_name, tool_input, conversation_id=None):
 
     elif tool_name == "get_customer_risk_profile":
         result = get_customer_risk_profile(tool_input["user_id"])
+
+    elif tool_name == "search_knowledge_base":
+        result = search_knowledge_base(tool_input["query"])
 
     else:
         result = f"Unknown tool: {tool_name}"
