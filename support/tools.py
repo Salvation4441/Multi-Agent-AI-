@@ -119,7 +119,7 @@ def get_customer_risk_profile(user_id):
     
 
 # creating wrapper function for rag
-def sarch_knowledge_base(query):
+def search_knowledge_base(query):
     result = rag_search(query)
     return {"result":result}
 
