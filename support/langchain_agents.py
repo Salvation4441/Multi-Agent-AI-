@@ -3,7 +3,7 @@ from django.conf import settings
 from langchain_anthropic import ChatAnthropic
 from langchain.agents import create_agent
 from .langchain_tools import get_order_details, get_refund_history, check_delivery_status, search_knowledge_base
-
+from langgraph.checkpoint.memory import InMemorySaver
 
 
 # SUPPORT SYSTEM PROMPT
@@ -37,23 +37,19 @@ Important rules:
 
 
 # Initialize Anthropic client
-llm = ChatAnthropic(
-    model = settings.CLAUDE_MODEL,
-    anthropic_api_key = settings.CLAUDE_API_KEY,
-)
+llm = ChatAnthropic(model = settings.CLAUDE_MODEL,api_key = settings.CLAUDE_API_KEY)
 
 # Support tools
-SUPPORT_TOOLS = [
-    get_order_details,
-    get_refund_history,
-    check_delivery_status,
-    search_knowledge_base,
-]
+SUPPORT_TOOLS = [get_order_details, get_refund_history, check_delivery_status, search_knowledge_base]
 
+
+# checkpointer
+checkpointer = InMemorySaver()
 
 # Agent
 support_agent = create_agent(
     model = llm,
     tools= SUPPORT_TOOLS,
-    system_prompt=SUPPORT_SYSTEM_PROMPT,
+    system_prompt= SUPPORT_SYSTEM_PROMPT,
+    checkpointer= checkpointer,
 )
