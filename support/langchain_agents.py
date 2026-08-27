@@ -4,6 +4,8 @@ from langchain_anthropic import ChatAnthropic
 from langchain.agents import create_agent
 from .langchain_tools import get_order_details, get_refund_history, check_delivery_status, search_knowledge_base
 from langgraph.checkpoint.memory import InMemorySaver
+from .models import AgentLog, Conversation
+from langchain.agents.middleware import wrap_tool_call
 
 
 # SUPPORT SYSTEM PROMPT
@@ -53,3 +55,40 @@ support_agent = create_agent(
     system_prompt= SUPPORT_SYSTEM_PROMPT,
     checkpointer= checkpointer,
 )
+
+
+# MiddleWare
+@wrap_tool_call
+def log_tool_call_middleware(request, handler):
+    # before tool execution
+    tool_name = request.tool_call["name"]
+    tool_args = request.tool_call['args']
+    
+    result = handler(request) # tool execution
+    # after tool execution
+    return result
+
+
+
+# running agent
+def run_support_langchain_agent(user_message, conversation_id, order_id, user_id):
+    convo = Conversation.objects.get(id = conversation_id)
+
+    
+    config = {"configurable": {"thread_id":str(conversation_id)}}
+
+    contextual_message = f"[Context: This conversation is about Order #{order_id}, user: {user_id}] {user_message}"
+    
+    result = support_agent.invoke({"messages": [{"role": "user", "content": contextual_message}]}, config=config)
+
+    reply = result["messages"][-1].content
+
+    # save final reply to the AgentLog
+    AgentLog.objects.create(    
+        conversation = convo,
+        event_type="final",
+        message = reply,
+    )
+
+    
+    return reply
