@@ -48,27 +48,6 @@ SUPPORT_TOOLS = [get_order_details, get_refund_history, check_delivery_status, s
 # checkpointer
 checkpointer = InMemorySaver()
 
-# Agent
-support_agent = create_agent(
-    model = llm,
-    tools= SUPPORT_TOOLS,
-    system_prompt= SUPPORT_SYSTEM_PROMPT,
-    checkpointer= checkpointer,
-)
-
-
-# MiddleWare
-@wrap_tool_call
-def log_tool_call_middleware(request, handler):
-    # before tool execution
-    tool_name = request.tool_call["name"]
-    tool_args = request.tool_call['args']
-    
-    result = handler(request) # tool execution
-    # after tool execution
-    return result
-
-
 
 # running agent
 def run_support_langchain_agent(user_message, conversation_id, order_id, user_id):
@@ -78,7 +57,44 @@ def run_support_langchain_agent(user_message, conversation_id, order_id, user_id
     config = {"configurable": {"thread_id":str(conversation_id)}}
 
     contextual_message = f"[Context: This conversation is about Order #{order_id}, user: {user_id}] {user_message}"
-    
+
+
+    # MiddleWare
+    @wrap_tool_call
+    def log_tool_call_middleware(request, handler):
+        tool_name = request.tool_call["name"]
+        tool_args = request.tool_call['args']
+
+        # before tool execution
+        AgentLog.objects.create(
+            conversation=convo,
+            event_type="tool_call",
+            message=f"Tool Call {tool_name} with {tool_args}"
+        )
+        
+        result = handler(request) # tool execution
+
+        # after tool execution
+        # store log result after executing
+        AgentLog.objects.create(
+            conversation=convo,
+            event_type="tool_result",
+            message=f"Tool Result {tool_name} with {str(result.content)[:200]}"
+        )
+
+        return result
+
+
+
+    # Agent
+    support_agent = create_agent(
+        model = llm,
+        tools= SUPPORT_TOOLS,
+        system_prompt= SUPPORT_SYSTEM_PROMPT,
+        checkpointer= checkpointer,
+        middleware=[log_tool_call_middleware],
+    )
+
     result = support_agent.invoke({"messages": [{"role": "user", "content": contextual_message}]}, config=config)
 
     reply = result["messages"][-1].content
