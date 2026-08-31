@@ -28,3 +28,6 @@ def check_delivery_status(tracking_number: str, carrier: str) -> dict:
 def search_knowledge_base(query: str) -> dict:
     """Search CoolBreze AC documents including refund policy, warranty policy and product FAQs. Use this this when customer ask about company policies, warrant coverage, warranty claims, refund eligibility, or  any general product information"""
     return search_knowledge(query)
+
+
+
