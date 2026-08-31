@@ -198,7 +198,13 @@ def run_support_langchain_agent(user_message, conversation_id, order_id, user_id
 
 # manager agent
 def run_manager_langchain_agent(case_summary, conversation_id):
-    
+    convo  = Conversation.objects.get(id = conversation_id)
+
+    event = {"type":"manager","message":f"Case recieved for review {case_summary[:200]}"}
+    publish(conversation_id,event)
+
+    AgentLog.objects.create(conversation = convo,event_type="manager",message = f"Case recieved for review {case_summary[:200]}")
+
     # creating the agent
     manager_agent = create_agent(
         model = llm,
@@ -210,4 +216,14 @@ def run_manager_langchain_agent(case_summary, conversation_id):
     result = manager_agent.invoke({"messages":[{"role" : "user","content":case_summary}]})
 
     decision = result["messages"][-1].content
+
+
+    # publish decision
+    event = {"type":"decision","message":str(decision[:200])}
+    publish(conversation_id,event)
+
+
+    # store in AgentLog
+    AgentLog.objects.create(conversation = convo, event_type="manager",message=f"Manager Decision: {decision[:200]}")
+
     return decision
