@@ -1,3 +1,4 @@
+from support.event_queue import publish,DONE
 from anthropic import Anthropic
 from django.conf import settings
 from langchain_anthropic import ChatAnthropic
@@ -65,6 +66,12 @@ def run_support_langchain_agent(user_message, conversation_id, order_id, user_id
         tool_name = request.tool_call["name"]
         tool_args = request.tool_call['args']
 
+
+        #  before tool call - publishing
+        event = {"type":"tool_call","message":f"Tool Call {tool_name} with {tool_args}"}
+        publish(conversation_id,event)
+        
+
         # before tool execution
         AgentLog.objects.create(
             conversation=convo,
@@ -75,6 +82,13 @@ def run_support_langchain_agent(user_message, conversation_id, order_id, user_id
         result = handler(request) # tool execution
 
         # after tool execution
+        #  after tool call - publishing
+        event = {"type":"tool_result","message":f"{tool_name} returned:  {str(result.content)[:200]}"}
+        publish(conversation_id,event)
+
+
+        
+
         # store log result after executing
         AgentLog.objects.create(
             conversation=convo,
@@ -99,12 +113,19 @@ def run_support_langchain_agent(user_message, conversation_id, order_id, user_id
 
     reply = result["messages"][-1].content
 
+
+    #  final reponse - publishing
+    event = {"type":"final","message":str(reply)}
+    publish(conversation_id,event)
+
     # save final reply to the AgentLog
     AgentLog.objects.create(    
         conversation = convo,
         event_type="final",
         message = reply,
     )
+
+    publish(conversation_id,DONE)
 
     
     return reply
