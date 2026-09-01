@@ -43,6 +43,9 @@ def chat(request, order_id):
 
         # send user message and conversation LLM
         # reply = run_support_agent(user_message, conversation.id, order.id,request.user.id)
+
+
+        # USING LANGCHAIN AGENTS
         reply = run_support_langchain_agent(user_message, conversation.id, order.id, request.user.id)
 
         # store the LLM reply
