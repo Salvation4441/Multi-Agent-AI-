@@ -3,7 +3,8 @@ from .tools import (
        get_order_details as order_details,
        get_refund_history as refund_history,
        check_delivery_status as check_delivery,
-       search_knowledge_base as search_knowledge
+       search_knowledge_base as search_knowledge,
+       get_customer_risk_profile as customer_risk_profile
     )
 
 @tool
@@ -29,5 +30,9 @@ def search_knowledge_base(query: str) -> dict:
     """Search CoolBreze AC documents including refund policy, warranty policy and product FAQs. Use this this when customer ask about company policies, warrant coverage, warranty claims, refund eligibility, or  any general product information"""
     return search_knowledge(query)
 
+@tool
+def get_customer_risk_profile(user_id: int) -> dict:
+    """Get the risk profile of a customer including order history,refund history,refund patterns and ratio. Use this to asses fraud risk."""
+    return customer_risk_profile(user_id)
 
 

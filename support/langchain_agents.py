@@ -4,7 +4,7 @@ from anthropic import Anthropic
 from django.conf import settings
 from langchain_anthropic import ChatAnthropic
 from langchain.agents import create_agent
-from .langchain_tools import get_order_details, get_refund_history, check_delivery_status, search_knowledge_base
+from .langchain_tools import get_order_details, get_refund_history, check_delivery_status, search_knowledge_base,get_customer_risk_profile
 from langgraph.checkpoint.memory import InMemorySaver
 from .models import AgentLog, Conversation
 from langchain.agents.middleware import wrap_tool_call
@@ -200,6 +200,13 @@ def run_support_langchain_agent(user_message, conversation_id, order_id, user_id
 def run_manager_langchain_agent(case_summary, conversation_id):
     convo  = Conversation.objects.get(id = conversation_id)
 
+    @tool
+    def assess_fraud_risk(user_id, conversation_id):
+        """Consult the risk agent to assess fraud risk for a customer. Use this when refund request looks suspicious or customer has multiple refunds or complaints. Pass the user_id to get a risk verdict"""
+        return risk_agent_langchain(user_id,conversation_id)
+
+
+
     event = {"type":"manager","message":f"Case recieved for review {case_summary[:200]}"}
     publish(conversation_id,event)
 
@@ -209,7 +216,7 @@ def run_manager_langchain_agent(case_summary, conversation_id):
     manager_agent = create_agent(
         model = llm,
         system_prompt=MANAGER_SYSYTEM_PROMPT,
-        tools=[],
+        tools=[assess_fraud_risk],
     )
 
 
@@ -227,3 +234,40 @@ def run_manager_langchain_agent(case_summary, conversation_id):
     AgentLog.objects.create(conversation = convo, event_type="manager",message=f"Manager Decision: {decision[:200]}")
 
     return decision
+
+# risk agent
+def risk_agent_langchain(user_id,conversation_id):
+    convo = Conversation.objects.get(id = conversation_id)
+
+    event = {"type":"risk","message":f"Risk assessment initiated for user #{user_id}"}
+    publish(conversation_id,event)
+    AgentLog.objects.create(
+        conversation= convo,
+        event_type="risk",
+        message=f"Risk assessment initiated for user #{user_id}"
+    )
+
+    # creating agent
+    risk_agent = create_agent(
+        model = llm,
+        system_prompt = RISK_SYSTEM_PROMPT,
+        tools = [get_customer_risk_profile]
+    )
+
+    result = risk_agent.invoke({
+        "messages":[
+            {
+                "role":"user",
+                "content":f"Please assess the fraud risk for user #{user_id}. Use your tools to check order history, refund patterns, and any other relevant information. Provide a risk score and recommendation.",
+            }
+        ]
+    })
+
+    verdict = result["messages"][-1].content
+
+    event = {"type":"risk","message":f"Risk Assessment for User #{user_id}: {verdict}"}
+    publish(conversation_id,event)
+
+    AgentLog.objects.create(conversation=convo,event_type="risk",message=f"Risk Assessment for User #{user_id}: {verdict}")
+
+    return verdict
