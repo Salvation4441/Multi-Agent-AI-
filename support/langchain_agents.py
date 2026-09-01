@@ -212,11 +212,33 @@ def run_manager_langchain_agent(case_summary, conversation_id):
 
     AgentLog.objects.create(conversation = convo,event_type="manager",message = f"Case recieved for review {case_summary[:200]}")
 
+
+    # creating middleware
+    @wrap_tool_call
+    def log_manager_tool_call_middleware(request,handler):
+
+        event = {"type":"manager","message":f"Consulting the risk agent for fruad assessment..................."}
+        publish(conversation_id,event)
+
+        AgentLog.objects.create(
+            conversation = convo,
+            event_type = "manager",
+            message = f"Consulting the risk agent for fruad assessment..................."
+        )
+
+        # before executing the tool
+        result = handler(request)
+
+        # after executing the tool
+        return result
+
+
     # creating the agent
     manager_agent = create_agent(
         model = llm,
         system_prompt=MANAGER_SYSYTEM_PROMPT,
         tools=[assess_fraud_risk],
+        middleware= [log_manager_tool_call_middleware]
     )
 
 
@@ -247,11 +269,33 @@ def risk_agent_langchain(user_id,conversation_id):
         message=f"Risk assessment initiated for user #{user_id}"
     )
 
+
+    @wrap_tool_call
+    def log_risk_agent_tool_call_middleware(request,handler):
+        result = handler(request)
+
+        tool_name = request.tool_call["name"]
+        tool_args = request.tool_call["args"]
+        
+        event= {"type":"risk","message":f"Tool Call {tool_name} with {tool_args}"}
+
+        publish(conversation_id,event)
+
+        AgentLog.objects.create(
+            conversation = convo,
+            event_type = "risk",
+            message = f"Tool Call {tool_name} with {tool_args}"
+        )
+        return result
+        
+
+
     # creating agent
     risk_agent = create_agent(
         model = llm,
         system_prompt = RISK_SYSTEM_PROMPT,
-        tools = [get_customer_risk_profile]
+        tools = [get_customer_risk_profile],
+        middleware=[log_risk_agent_tool_call_middleware]
     )
 
     result = risk_agent.invoke({
